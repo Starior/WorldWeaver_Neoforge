@@ -1,0 +1,102 @@
+package org.betterx.wover.datagen.api.provider;
+
+import org.betterx.wover.core.api.ModCore;
+import org.betterx.wover.datagen.api.WoverDataProvider;
+import org.betterx.wover.datagen.api.WoverRegistryContentProvider;
+import org.betterx.wover.datagen.api.WoverTagProvider;
+import org.betterx.wover.preset.api.context.FlatLevelPresetBootstrapContext;
+import org.betterx.wover.preset.api.flat.FlatLevelPresetTags;
+import org.betterx.wover.tag.api.event.context.TagBootstrapContext;
+
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.data.PackOutput;
+import net.minecraft.data.tags.TagsProvider;
+import net.minecraft.data.worldgen.BootstrapContext;
+import net.minecraft.world.level.levelgen.flat.FlatLevelGeneratorPreset;
+
+import net.neoforged.neoforge.common.data.ExistingFileHelper;
+
+import java.util.concurrent.CompletableFuture;
+
+/**
+ * A provider to easily set up {@link FlatLevelGeneratorPreset}s
+ */
+public abstract class WoverFlatLevelPresetProvider
+        extends WoverRegistryContentProvider<FlatLevelGeneratorPreset>
+        implements WoverDataProvider.Secondary<TagsProvider<FlatLevelGeneratorPreset>> {
+
+    /**
+     * Creates a new instance of {@link WoverRegistryContentProvider}.
+     *
+     * @param modCore The ModCore instance of the Mod that is providing this instance.
+     * @param title   The title of the provider. Mainly used for logging.
+     */
+    public WoverFlatLevelPresetProvider(
+            ModCore modCore,
+            String title
+    ) {
+        super(modCore, title, Registries.FLAT_LEVEL_GENERATOR_PRESET);
+    }
+
+
+    /**
+     * Called, when The Data needs to be serialized.
+     *
+     * @param output           The output to write the data to.
+     * @param registriesFuture A future sent from the data generator
+     * @param existingFileHelper The existing file helper from NeoForge datagen
+     * @return A new {@link TagsProvider}
+     */
+    @Override
+    public TagsProvider<FlatLevelGeneratorPreset> getSecondaryProvider(
+            PackOutput output,
+            CompletableFuture<HolderLookup.Provider> registriesFuture,
+            ExistingFileHelper existingFileHelper
+    ) {
+        return new FlatLevelTagProvider(modCore).getProvider(output, registriesFuture, existingFileHelper);
+    }
+
+    /**
+     * Called, when the Elements of the Registry need to be created and registered.
+     * <p>
+     * This method provides an extended register Method that is specialized to create
+     * {@link FlatLevelGeneratorPreset}.
+     *
+     * @param context The context to add the elements to.
+     */
+    protected abstract void bootstrap(FlatLevelPresetBootstrapContext context);
+
+    /**
+     * Called before the tags are written to disk.
+     * <p>
+     * This method is used to add elements to the tags. The {@link TagBootstrapContext}
+     * provides the necessary methods to add elements.
+     *
+     * @param provider the {@link TagBootstrapContext} you can use to add elements to the tags
+     */
+    protected abstract void prepareTags(TagBootstrapContext<FlatLevelGeneratorPreset> provider);
+
+    /**
+     * Called, when the Elements of the Registry need to be created and registered.
+     * <p>
+     * This implementation just redirects to {@link #bootstrap(FlatLevelPresetBootstrapContext)}
+     *
+     * @param context The context to add the elements to.
+     */
+    @Override
+    protected final void bootstrap(BootstrapContext<FlatLevelGeneratorPreset> context) {
+        bootstrap(new FlatLevelPresetBootstrapContext(context));
+    }
+
+    private class FlatLevelTagProvider extends WoverTagProvider<FlatLevelGeneratorPreset, TagBootstrapContext<FlatLevelGeneratorPreset>> {
+        public FlatLevelTagProvider(ModCore modCore) {
+            super(modCore, FlatLevelPresetTags.TAGS);
+        }
+
+        @Override
+        public void prepareTags(TagBootstrapContext<FlatLevelGeneratorPreset> provider) {
+            WoverFlatLevelPresetProvider.this.prepareTags(provider);
+        }
+    }
+}

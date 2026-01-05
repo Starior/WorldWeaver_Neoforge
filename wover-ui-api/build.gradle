@@ -1,0 +1,8 @@
+archivesBaseName = "wover-ui-api"
+
+ext {
+    baseNamespace = "ui"
+    baseClass = "WoverUi"
+}
+
+moduleDependencies(project, ['wover-core-api', 'wover-event-api'])

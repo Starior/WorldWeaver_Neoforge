@@ -1,0 +1,20 @@
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+    id 'idea'
+    id 'eclipse'
+    id 'net.neoforged.moddev' version "${moddev_version}"
+}
+archivesBaseName = project.archives_base_name
+sourceCompatibility = JavaVersion.VERSION_21
+targetCompatibility = JavaVersion.VERSION_21
+
+
+def getDependencies(project, List<String> depNames, configuration) {
+    return depNames.iterator().collect {
+        project.dependencies.project(path: ":WorldWeaver:$it", configuration: configuration)
+    }
+}
+
+apply from: "functions.gradle"
+apply from: "common.gradle"

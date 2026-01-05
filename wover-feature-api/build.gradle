@@ -1,0 +1,9 @@
+archivesBaseName = "wover-feature-api"
+
+ext {
+    baseNamespace = "feature"
+    baseClass = "WoverFeature"
+}
+
+moduleDependencies(project, ['wover-core-api', 'wover-event-api', 'wover-surface-api', 'wover-block-api', 'wover-structure-api', 'wover-math-api'])
+testDependencies(project, ['wover-biome-api'])

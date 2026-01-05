@@ -1,0 +1,169 @@
+package org.betterx.wover.ui.impl.client;
+
+import de.ambertation.wunderlib.ui.ColorHelper;
+import de.ambertation.wunderlib.ui.layout.components.HorizontalStack;
+import de.ambertation.wunderlib.ui.layout.components.LayoutComponent;
+import de.ambertation.wunderlib.ui.layout.components.VerticalStack;
+import de.ambertation.wunderlib.ui.layout.values.Size;
+import de.ambertation.wunderlib.ui.layout.values.Value;
+import org.betterx.wover.config.api.client.ClientConfigs;
+import org.betterx.wover.core.api.ModCore;
+import org.betterx.wover.entrypoint.LibWoverUi;
+import org.betterx.wover.ui.api.VersionChecker;
+
+import com.mojang.blaze3d.systems.RenderSystem;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.fml.ModContainer;
+
+import org.jetbrains.annotations.NotNull;
+
+import java.util.Map;
+
+@OnlyIn(Dist.CLIENT)
+public class UpdatesScreen extends WoverLayoutScreen {
+    static final ResourceLocation UPDATE_LOGO_LOCATION = LibWoverUi.C.mk("icon_updater.png");
+
+    public UpdatesScreen(@NotNull Runnable onClose) {
+        super(onClose, Component.translatable("wover.updates.title"), 10, 10, 10);
+    }
+
+    public UpdatesScreen(Screen parent) {
+        super(setScreenOnClose(parent), Component.translatable("wover.updates.title"), 10, 10, 10);
+    }
+
+    public static void showUpdateUI() {
+        if (!RenderSystem.isOnRenderThread()) {
+            RenderSystem.recordRenderCall(() -> Minecraft.getInstance()
+                                                         .setScreen(new UpdatesScreen(Minecraft.getInstance().screen)));
+        } else {
+            Minecraft.getInstance().setScreen(new UpdatesScreen(Minecraft.getInstance().screen));
+        }
+    }
+
+    public ResourceLocation getUpdaterIcon(ModCore core) {
+        if (core.namespace.equals(LibWoverUi.C.namespace)) {
+            return UPDATE_LOGO_LOCATION;
+        }
+        ModContainer nfo = core.modContainer;
+        Map<String, Object> props = getWoverProperties(nfo);
+        if (props != null) {
+            Object icon = props.get("updater_icon");
+            if (icon instanceof String iconName) {
+                return core.mk(iconName);
+            }
+        }
+        return null;
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Map<String, Object> getWoverProperties(ModContainer container) {
+        if (container == null) {
+            return null;
+        }
+        Object props = container.getModInfo().getModProperties().get("wover");
+        if (props instanceof Map<?, ?> map) {
+            return (Map<String, Object>) map;
+        }
+        return null;
+    }
+
+    @Override
+    protected LayoutComponent<?, ?> initContent() {
+        VerticalStack rows = new VerticalStack(relative(1), fit()).centerHorizontal();
+        rows.addMultilineText(fill(), fit(), Component.translatable("wover.updates.description"))
+            .centerHorizontal();
+
+        rows.addSpacer(8);
+
+        VersionChecker.forEachUpdate((mod, cur, updated) -> {
+            ModCore core = ModCore.create(mod);
+            ModContainer nfo = core.modContainer;
+            ResourceLocation icon = getUpdaterIcon(core);
+            HorizontalStack row = rows.addRow(fixed(320), fit()).centerHorizontal();
+            if (icon != null) {
+                row.addImage(Value.fit(), Value.fit(), icon, Size.of(32));
+                row.addSpacer(4);
+            } else {
+                row.addSpacer(36);
+            }
+            if (nfo != null) {
+                row.addText(fit(), fit(), Component.literal(nfo.getModInfo().getDisplayName()))
+                   .setColor(ColorHelper.WHITE);
+            } else {
+                row.addText(fit(), fit(), Component.literal(mod)).setColor(ColorHelper.WHITE);
+            }
+            row.addSpacer(4);
+            row.addText(fit(), fit(), Component.literal(cur));
+            row.addText(fit(), fit(), Component.literal(" -> "));
+            row.addText(fit(), fit(), Component.literal(updated)).setColor(ColorHelper.GREEN);
+            row.addFiller();
+            boolean createdDownloadLink = false;
+            Map<String, Object> woverProps = getWoverProperties(nfo);
+            if (woverProps != null && woverProps.get("downloads") instanceof Map<?, ?> downloadLinks) {
+                String link = null;
+                Component name = null;
+                Object modrinth = downloadLinks.get("modrinth");
+                Object curseforge = downloadLinks.get("curseforge");
+                if (ClientConfigs.CLIENT.prefereModrinth.get() && modrinth instanceof String modrinthLink) {
+                    link = modrinthLink;
+                    name = Component.translatable("wover.updates.modrinth_link");
+                } else if (curseforge instanceof String curseforgeLink) {
+                    link = curseforgeLink;
+                    name = Component.translatable("wover.updates.curseforge_link");
+                }
+
+                if (link != null) {
+                    createdDownloadLink = true;
+                    final String finalLink = link;
+                    row.addButton(fit(), fit(), name)
+                       .onPress((bt) -> {
+                           this.openLink(finalLink);
+                       }).centerVertical();
+                }
+            }
+
+            if (!createdDownloadLink && nfo != null && nfo.getModInfo().getModURL().isPresent()) {
+                row.addButton(fit(), fit(), Component.translatable("wover.updates.download_link"))
+                   .onPress((bt) -> {
+                       this.openLink(nfo.getModInfo().getModURL().get().toString());
+                   }).centerVertical();
+            }
+        });
+
+        VerticalStack layout = new VerticalStack(relative(1), fill()).centerHorizontal();
+        //layout.addSpacer(8);
+        layout.addScrollable(rows);
+        layout.addSpacer(8);
+
+
+        HorizontalStack footer = layout.addRow(fill(), fit());
+        footer.addFiller();
+        footer.addCheckbox(
+                      fit(), fit(),
+                      Component.translatable("wover.updates.disable_check"),
+                      !ClientConfigs.CLIENT.checkForNewVersions.get()
+              )
+              .onChange((cb, state) -> {
+                  ClientConfigs.CLIENT.checkForNewVersions.set(!state);
+                  ClientConfigs.CLIENT.save();
+              });
+        footer.addSpacer(4);
+        footer.addButton(fit(), fit(), CommonComponents.GUI_DONE).onPress((bt -> {
+            onClose();
+        }));
+        return layout;
+    }
+
+    @Override
+    public void renderBackground(GuiGraphics guiGraphics, int i, int j, float f) {
+        guiGraphics.fill(0, 0, width, height, 0xBD343444);
+    }
+}

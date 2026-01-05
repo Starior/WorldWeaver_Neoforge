@@ -1,0 +1,15 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "org.betterx.wover.item.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "mixins": [
+    "item_stack_setup.CraftingRecipeMixin",
+    "item_stack_setup.ItemInputMixin",
+    "item_stack_setup.LootItemFunctionMixin",
+    "item_stack_setup.SmithingTransformRecipeMixin"
+  ]
+}

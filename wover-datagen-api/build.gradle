@@ -1,0 +1,8 @@
+archivesBaseName = "wover-datagen-api"
+
+ext {
+    baseNamespace = "datagen"
+    baseClass = "WoverDatagen"
+}
+
+moduleDependencies(project, ['wover-core-api'])

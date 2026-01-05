@@ -1,0 +1,18 @@
+{
+  "description.config.wover.main.log.verbose": "Записывает дополнительную информацию в файл журнала. Полезно для устранения неполадок",
+  "description.config.wover.main.server.force_default_world_preset": "Когда вы создаете новый мир на сервере, по умолчанию будет выбран тип мира BetterX. Это можно изменить в файле `server-properties`.",
+  "description.config.wover.client.general.prefere_modrinth": "Иногда мы предоставляем ссылки на скачивание обновлений. Если вы предпочитаете, чтобы они содержали ссылку на Modrinth, а не на CurseForge, вы можете включить эту опцию.",
+  "title.config.group.wover.general": "Общие",
+  "title.config.group.wover.loading": "Загрузка и создание мира",
+  "title.config.group.wover.server": "Серверные настройки",
+  "title.config.group.wover.structure": "Структуры",
+  "title.config.group.wover.performance": "Производительность",
+  "title.config.group.wover.entity": "Мобы и игроки",
+  "title.config.group.wover.ui": "Пользовательский интерфейс",
+  "title.config.group.wover.rendering": "Отображение",
+  "title.config.group.wover.cosmetic": "Косметика",
+  "title.config.wover.main.log.verbose": "Подробное журналирование",
+  "title.config.wover.main.server.force_default_world_preset": "Тип мира BetterX используется по умолчанию для новых серверных миров",
+  "title.config.wover.client.general.prefere_modrinth": "Ссылка на Modrinth",
+  "wover.mainmenu.title": "Настройка WorldWeaver"
+}

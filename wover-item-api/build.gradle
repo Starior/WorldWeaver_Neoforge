@@ -1,0 +1,8 @@
+archivesBaseName = "wover-item-api"
+
+ext {
+    baseNamespace = "item"
+    baseClass = "LibWoverItemApi"
+}
+
+moduleDependencies(project, ['wover-common-api', 'wover-core-api', 'wover-tag-api', 'wover-event-api', 'wover-datagen-api'])

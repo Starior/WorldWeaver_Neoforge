@@ -1,0 +1,14 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "org.betterx.wover.preset.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "mixins": [
+    "DedicatedServerPropertiesMixin",
+    "WorldDimensionDataMixin",
+    "WorldPresetAccessor"
+  ]
+}

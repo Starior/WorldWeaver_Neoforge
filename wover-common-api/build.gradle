@@ -1,0 +1,5 @@
+archivesBaseName = "wover-common-api"
+ext {
+    baseNamespace = "common"
+    baseClass = "WoverSurface"
+}

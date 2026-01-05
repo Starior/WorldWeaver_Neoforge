@@ -1,0 +1,8 @@
+archivesBaseName = "wover-recipe-api"
+
+ext {
+    baseNamespace = "recipe"
+    baseClass = "LibWoverRecipe"
+}
+
+moduleDependencies(project, ['wover-core-api', 'wover-item-api', 'wover-block-api', 'wover-event-api', 'wover-tag-api', 'wover-datagen-api'])

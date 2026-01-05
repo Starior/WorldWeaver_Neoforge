@@ -1,0 +1,22 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "org.betterx.wover.events.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "MinecraftServerMixin",
+    "ReloadableServerResourcesMixin",
+    "create_new_world_folder.WorldDimensionDataMixin",
+    "dimension_load.WorldStemMixin",
+    "resource_manager.MinecraftServerMixin",
+    "resource_manager.WorldStemMixin",
+    "server_level_ready.ServerLevelMixin",
+    "world_folder.MainMixin",
+    "world_registry.WorldDimensionDataMixin",
+    "world_registry.WorldLoaderMixin",
+    "world_registry.WorldStemMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

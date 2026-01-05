@@ -1,0 +1,44 @@
+.gradle/
+build/
+out/
+classes/
+
+# eclipse
+
+*.launch
+
+# idea
+
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# vscode
+
+.settings/
+.vscode/
+bin/
+.classpath
+.project
+
+# fabric
+
+run/
+run-client/
+run-server/
+output/
+*.log
+CHANGES.md
+modrinth.json
+node_modules/
+generated/.cache/
+generated/
+/public/img/header_clean.png
+/public/img/icon.png
+
+# Project exclude paths
+/gradle/
+/javadoc/
+/public/
+/tools/

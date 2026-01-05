@@ -1,0 +1,8 @@
+archivesBaseName = "wover-math-api"
+
+ext {
+    baseNamespace = "math"
+    baseClass = "WoverMath"
+}
+
+moduleDependencies(project, ['wover-core-api'])

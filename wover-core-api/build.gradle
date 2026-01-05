@@ -1,0 +1,8 @@
+archivesBaseName = "wover-core-api"
+ext {
+    baseNamespace = "core"
+    baseClass = "WoverCore"
+}
+
+
+moduleDependencies(project, ['wover-common-api'])

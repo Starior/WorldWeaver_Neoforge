@@ -1,0 +1,18 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "org.betterx.wover.events.mixin.client",
+  "compatibilityLevel": "JAVA_21",
+  "client": [
+    "allow_experimental_warning_screen.WorldOpenFlowsMixin",
+    "before_client_load.WorldOpenFlowsMixin",
+    "create_new_world_folder.CreateWorldScreenMixin",
+    "startup_screen.MinecraftMixin",
+    "world_folder.CreateWorldScreenMixin",
+    "world_folder.WorldOpenFlowsMixin",
+    "world_registry.CreateWorldScreenMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

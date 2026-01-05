@@ -1,0 +1,9 @@
+archivesBaseName = "wover-surface-api"
+
+ext {
+    baseNamespace = "surface"
+    baseClass = "WoverSurface"
+}
+
+moduleDependencies(project, ['wover-common-api', 'wover-datagen-api', 'wover-core-api', 'wover-math-api', 'wover-event-api'])
+//datagenDependencies(project, ['wover-preset-api'])

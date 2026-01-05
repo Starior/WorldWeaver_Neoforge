@@ -1,0 +1,23 @@
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+    id 'idea'
+    id 'eclipse'
+    id 'net.neoforged.moddev' version "${moddev_version}"
+    id "com.modrinth.minotaur" version "2.+"
+    id "com.matthewprenger.cursegradle" version "1.4.0"
+}
+archivesBaseName = project.archives_base_name
+sourceCompatibility = JavaVersion.VERSION_21
+targetCompatibility = JavaVersion.VERSION_21
+
+
+def getDependencies(project, List<String> depNames, configuration) {
+    return depNames.iterator().collect {
+        project.dependencies.project(path: ":$it", configuration: configuration)
+    }
+}
+
+apply from: "functions.gradle"
+apply from: "common.gradle"
+apply from: "helper.gradle"
