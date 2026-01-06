@@ -3,9 +3,7 @@ package org.betterx.wover.item.api;
 import org.betterx.wover.core.api.ModCore;
 import org.betterx.wover.item.api.smithing.SmithingTemplates;
 import org.betterx.wover.tag.api.event.context.ItemTagBootstrapContext;
-
 import net.minecraft.core.Direction;
-import net.minecraft.core.Registry;
 import net.minecraft.core.dispenser.BlockSource;
 import net.minecraft.core.dispenser.DefaultDispenseItemBehavior;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -18,8 +16,8 @@ import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.*;
 import net.minecraft.world.level.block.DispenserBlock;
-
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -31,7 +29,7 @@ import net.neoforged.bus.api.IEventBus;
 public class ItemRegistry {
     private static final Map<ModCore, ItemRegistry> REGISTRIES = new HashMap<>();
     public final ModCore C;
-    private final Map<ResourceLocation, Item> items = new HashMap<>();
+    private final Map<ResourceLocation, Item> items = new LinkedHashMap<>();
     private Map<Item, TagKey<Item>[]> datagenTags;
     private Runnable initializer;
     private boolean initialized;

@@ -219,6 +219,11 @@ allprojects { projIt ->
         }
     }
 
+    tasks.withType(Jar).configureEach {
+        // Avoid split-package JPMS errors on server launches.
+        exclude("net/minecraft/**")
+    }
+
     if (project == woverRootProject) {
         tasks.named("processResources") {
             // Pull subproject resources into the root mod output for mixin configs, etc.
