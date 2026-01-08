@@ -97,9 +97,7 @@ public class BlockRegistry {
 
             if (block.defaultBlockState().ignitedByLava()) {
                 FireBlock fire = (FireBlock) Blocks.FIRE;
-                if (fire.getBurnOdds(block.defaultBlockState()) == 0) {
-                    fire.setFlammable(block, 5, 5);
-                }
+                fire.setFlammable(block, 5, 5);
             }
         }
         return block;
