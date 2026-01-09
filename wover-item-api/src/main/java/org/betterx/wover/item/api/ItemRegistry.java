@@ -22,12 +22,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Stream;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import net.neoforged.neoforge.registries.RegisterEvent;
 import net.neoforged.bus.api.IEventBus;
 
 public class ItemRegistry {
     private static final Map<ModCore, ItemRegistry> REGISTRIES = new HashMap<>();
+    private static final AtomicBoolean HOOKED = new AtomicBoolean(false);
     public final ModCore C;
     private final Map<ResourceLocation, Item> items = new LinkedHashMap<>();
     private Map<Item, TagKey<Item>[]> datagenTags;
@@ -96,7 +98,9 @@ public class ItemRegistry {
     }
 
     public static void hook(IEventBus bus) {
-        bus.addListener(RegisterEvent.class, ItemRegistry::onRegister);
+        if (HOOKED.compareAndSet(false, true)) {
+            bus.addListener(RegisterEvent.class, ItemRegistry::onRegister);
+        }
     }
 
     public <T extends Item> T registerAsTool(String path, T item, TagKey<Item>... tags) {

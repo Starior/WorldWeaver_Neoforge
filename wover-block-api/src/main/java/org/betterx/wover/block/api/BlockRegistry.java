@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.stream.Stream;
+import java.util.concurrent.atomic.AtomicBoolean;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.RegisterEvent;
 import org.jetbrains.annotations.NotNull;
@@ -36,6 +37,7 @@ public class BlockRegistry {
     private static final Comparator<ResourceLocation> ID_ORDER = Comparator
             .comparing(ResourceLocation::getNamespace)
             .thenComparing(ResourceLocation::getPath);
+    private static final AtomicBoolean HOOKED = new AtomicBoolean(false);
     public final ModCore C;
     private final Map<ResourceLocation, Block> blocks = new HashMap<>();
     private Map<Block, TagKey<Block>[]> datagenTags;
@@ -209,6 +211,8 @@ public class BlockRegistry {
     }
 
     public static void hook(IEventBus bus) {
-        bus.addListener(RegisterEvent.class, BlockRegistry::onRegister);
+        if (HOOKED.compareAndSet(false, true)) {
+            bus.addListener(RegisterEvent.class, BlockRegistry::onRegister);
+        }
     }
 }
