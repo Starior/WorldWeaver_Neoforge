@@ -92,11 +92,8 @@ public class BiomeManagerImpl {
 
     private static void onBootstrapTags(TagBootstrapContext<Biome> biomeTagBootstrapContext) {
         final BiomeBootstrapContextImpl context = initContext(null);
+        if (context == null) return;
         context.prepareTags(biomeTagBootstrapContext);
-
-        //preparing tags is the last step of the bootstrap process, when we are done
-        // we can invalidate the context
-        CustomBootstrapContext.invalidateContext(Registries.BIOME);
     }
 
     public static ResourceKey<Biome> createKey(

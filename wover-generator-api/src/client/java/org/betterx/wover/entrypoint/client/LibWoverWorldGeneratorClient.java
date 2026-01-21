@@ -54,5 +54,6 @@ public class LibWoverWorldGeneratorClient {
 
         WorldPresetsUI.registerCustomUI(WorldPresets.WOVER_WORLD_AMPLIFIED, WorldSetupScreen::new);
         WorldPresetsUI.registerCustomUI(WorldPresets.WOVER_WORLD_LARGE, WorldSetupScreen::new);
+        WorldPresetsUI.registerCustomUI(WorldPresets.WOVER_WORLD_SUPERFLAT, WorldSetupScreen::new);
     }
 }

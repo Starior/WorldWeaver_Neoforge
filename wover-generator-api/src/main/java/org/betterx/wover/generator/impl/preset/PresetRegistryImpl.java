@@ -14,6 +14,8 @@ import org.betterx.wover.preset.api.context.WorldPresetBootstrapContext;
 import org.betterx.wover.tag.api.event.context.TagBootstrapContext;
 
 import net.minecraft.core.Holder;
+import net.minecraft.core.HolderGetter;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.dimension.LevelStem;
 import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
@@ -31,6 +33,9 @@ public class PresetRegistryImpl {
     public final static ResourceKey<WorldPreset> WOVER_WORLD_AMPLIFIED = WorldPresetManager.createKey(
             LibWoverWorldGenerator.C.id(
                     "amplified"));
+    public final static ResourceKey<WorldPreset> WOVER_WORLD_SUPERFLAT = WorldPresetManager.createKey(
+            LibWoverWorldGenerator.C.id(
+                    "superflat"));
     public final static ResourceKey<WorldPreset> BCL_WORLD_17
             = WorldPresetManager.createKey(LegacyHelper.BCLIB_CORE.id("legacy_17"));
 
@@ -38,6 +43,7 @@ public class PresetRegistryImpl {
         ctx.register(WorldPresets.WOVER_WORLD, createNormal(ctx));
         ctx.register(WorldPresets.WOVER_WORLD_LARGE, createLarge(ctx));
         ctx.register(WorldPresets.WOVER_WORLD_AMPLIFIED, createAmplified(ctx));
+        ctx.register(WorldPresets.WOVER_WORLD_SUPERFLAT, createSuperflat(ctx));
 
         if (LegacyHelper.isLegacyEnabled()) {
             final ResourceKey<WorldPreset> BCL_WORLD
@@ -59,7 +65,8 @@ public class PresetRegistryImpl {
                 WorldPresetTags.NORMAL,
                 WorldPresets.WOVER_WORLD,
                 WorldPresets.WOVER_WORLD_AMPLIFIED,
-                WorldPresets.WOVER_WORLD_LARGE
+                WorldPresets.WOVER_WORLD_LARGE,
+                WorldPresets.WOVER_WORLD_SUPERFLAT
         );
     }
 
@@ -131,6 +138,26 @@ public class PresetRegistryImpl {
                 ctx.netherContext, WoverNetherConfig.DEFAULT,
                 ctx.endContext, WoverEndConfig.DEFAULT
         );
+    }
+
+    private static WorldPreset createSuperflat(WorldPresetBootstrapContext ctx) {
+        return buildPreset(
+                resolveFlatOverworld(ctx),
+                ctx.netherContext, WoverNetherConfig.DEFAULT,
+                ctx.endContext, WoverEndConfig.DEFAULT
+        );
+    }
+
+    private static LevelStem resolveFlatOverworld(WorldPresetBootstrapContext ctx) {
+        final HolderGetter<WorldPreset> presets = ctx.lookup(Registries.WORLD_PRESET);
+        if (presets != null) {
+            final Holder<WorldPreset> flatPreset = presets.getOrThrow(net.minecraft.world.level.levelgen.presets.WorldPresets.FLAT);
+            final LevelStem stem = WorldPresetManager.getDimension(flatPreset, LevelStem.OVERWORLD);
+            if (stem != null) {
+                return stem;
+            }
+        }
+        return ctx.overworldStem;
     }
 
     private static WorldPreset buildPreset(
