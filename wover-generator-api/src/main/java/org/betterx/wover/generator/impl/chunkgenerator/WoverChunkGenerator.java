@@ -12,6 +12,8 @@ import org.betterx.wover.common.generator.api.chunkgenerator.RestorableBiomeSour
 import org.betterx.wover.common.surface.api.InjectableSurfaceRules;
 import org.betterx.wover.core.api.IntegrationCore;
 import org.betterx.wover.entrypoint.LibWoverWorldGenerator;
+import org.betterx.wover.generator.impl.biomesource.end.WoverEndBiomeSource;
+import org.betterx.wover.generator.impl.biomesource.nether.WoverNetherBiomeSource;
 import org.betterx.wover.surface.impl.SurfaceRuleUtil;
 
 import com.mojang.serialization.MapCodec;
@@ -29,6 +31,7 @@ import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.dimension.LevelStem;
 import net.minecraft.world.level.levelgen.*;
 
+import java.lang.reflect.Method;
 import java.util.List;
 import org.jetbrains.annotations.NotNull;
 
@@ -74,6 +77,7 @@ public class WoverChunkGenerator extends NoiseBasedChunkGenerator implements
         }
 
         if (IntegrationCore.RUNS_TERRABLENDER) {
+            applyTerraBlenderRuleCategory(holder, null, biomeSource);
             LibWoverWorldGenerator.C.log.info("Make sure features are loaded from terrablender:"
                     + biomeSource.getClass().getName());
             //terrablender is invalidating the feature initialization
@@ -194,11 +198,63 @@ public class WoverChunkGenerator extends NoiseBasedChunkGenerator implements
 
     @Override
     public void wover_injectSurfaceRules(Registry<LevelStem> dimensionRegistry, ResourceKey<LevelStem> dimensionKey) {
+        if (IntegrationCore.RUNS_TERRABLENDER) {
+            applyTerraBlenderRuleCategory(generatorSettings(), dimensionKey, this.getBiomeSource());
+        }
+
         SurfaceRuleUtil.injectNoiseBasedSurfaceRules(
                 dimensionKey,
                 generatorSettings(),
                 this.getBiomeSource()
         );
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private static void applyTerraBlenderRuleCategory(
+            Holder<NoiseGeneratorSettings> holder,
+            ResourceKey<LevelStem> dimensionKey,
+            BiomeSource biomeSource
+    ) {
+        if (!holder.isBound()) {
+            return;
+        }
+
+        String categoryName = null;
+        if (dimensionKey != null) {
+            if (dimensionKey.equals(LevelStem.NETHER)) {
+                categoryName = "NETHER";
+            } else if (dimensionKey.equals(LevelStem.END)) {
+                categoryName = "END";
+            } else if (dimensionKey.equals(LevelStem.OVERWORLD)) {
+                categoryName = "OVERWORLD";
+            }
+        }
+
+        if (categoryName == null) {
+            if (biomeSource instanceof WoverNetherBiomeSource) {
+                categoryName = "NETHER";
+            } else if (biomeSource instanceof WoverEndBiomeSource) {
+                categoryName = "END";
+            }
+        }
+
+        if (categoryName == null) {
+            return;
+        }
+
+        try {
+            final Class<?> ruleCategoryClass = Class.forName("terrablender.api.SurfaceRuleManager$RuleCategory");
+            final Enum ruleCategory = Enum.valueOf((Class<Enum>) ruleCategoryClass.asSubclass(Enum.class), categoryName);
+            final Method setRuleCategory = holder.value().getClass().getMethod("setRuleCategory", ruleCategoryClass);
+            setRuleCategory.invoke(holder.value(), ruleCategory);
+        } catch (ReflectiveOperationException e) {
+            LibWoverWorldGenerator.C.log.warn(
+                    "Unable to set TerraBlender surface rule category {} for {}",
+                    categoryName,
+                    biomeSource.getClass().getName(),
+                    e
+            );
+        }
     }
 }
 
