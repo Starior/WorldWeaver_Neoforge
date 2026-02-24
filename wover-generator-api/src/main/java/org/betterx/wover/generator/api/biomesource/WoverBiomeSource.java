@@ -23,6 +23,7 @@ import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
 
 import com.google.common.base.Stopwatch;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -38,6 +39,7 @@ public abstract class WoverBiomeSource extends BiomeSource implements
     Set<Holder<Biome>> dynamicPossibleBiomes;
     @Nullable
     private BiomeSource fallbackBiomeSource;
+    private Set<ResourceKey<Biome>> managedPossibleBiomeKeys;
     protected long currentSeed;
     protected int maxHeight;
 
@@ -58,6 +60,7 @@ public abstract class WoverBiomeSource extends BiomeSource implements
         didCreatePickers = false;
         dynamicPossibleBiomes = Set.of();
         fallbackBiomeSource = null;
+        managedPossibleBiomeKeys = Set.of();
         currentSeed = seed;
     }
 
@@ -145,6 +148,30 @@ public abstract class WoverBiomeSource extends BiomeSource implements
         return true;
     }
 
+    private void rememberManagedPossibleBiomeKeys() {
+        if (!managedPossibleBiomeKeys.isEmpty() || dynamicPossibleBiomes == null || dynamicPossibleBiomes.isEmpty()) {
+            return;
+        }
+
+        HashSet<ResourceKey<Biome>> keys = new HashSet<>();
+        for (Holder<Biome> biomeHolder : dynamicPossibleBiomes) {
+            biomeHolder.unwrapKey().ifPresent(keys::add);
+        }
+        this.managedPossibleBiomeKeys = keys;
+    }
+
+    private boolean isWoverManagedBiome(@Nullable Holder<Biome> biomeHolder) {
+        if (biomeHolder == null) {
+            return false;
+        }
+
+        if (biomeHolder.unwrapKey().isPresent()) {
+            return managedPossibleBiomeKeys.contains(biomeHolder.unwrapKey().orElseThrow());
+        }
+
+        return dynamicPossibleBiomes.contains(biomeHolder);
+    }
+
     protected final Holder<Biome> applyFallbackBiomeSource(
             Holder<Biome> biome,
             int biomeX,
@@ -159,7 +186,8 @@ public abstract class WoverBiomeSource extends BiomeSource implements
 
         try {
             final Holder<Biome> fallbackBiome = fallbackSource.getNoiseBiome(biomeX, biomeY, biomeZ, sampler);
-            if (fallbackBiome != null && !this.dynamicPossibleBiomes.contains(fallbackBiome)) {
+            // Preserve placement from external biome sources (e.g. TerraBlender) for biomes Wover did not originally own.
+            if (fallbackBiome != null && !isWoverManagedBiome(fallbackBiome)) {
                 return fallbackBiome;
             }
         } catch (Throwable ignored) {
@@ -191,6 +219,7 @@ public abstract class WoverBiomeSource extends BiomeSource implements
         if (this.dynamicPossibleBiomes == null) {
             this.dynamicPossibleBiomes = Set.of();
         }
+        rememberManagedPossibleBiomeKeys();
         this.didCreatePickers = true;
 
         onFinishBiomeRebuild(pickers);
@@ -213,6 +242,10 @@ public abstract class WoverBiomeSource extends BiomeSource implements
 
     @Override
     public WoverBiomeSource mergeWithBiomeSource(BiomeSource inputBiomeSource) {
+        if (managedPossibleBiomeKeys.isEmpty()) {
+            rebuildBiomes(false);
+            rememberManagedPossibleBiomeKeys();
+        }
         setFallbackBiomeSource(inputBiomeSource);
 
         Stopwatch sw = Stopwatch.createStarted();
