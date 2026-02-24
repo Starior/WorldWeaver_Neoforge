@@ -2,6 +2,7 @@
   "generator.wover.amplified": "BetterX - Amplified",
   "generator.wover.large": "BetterX - Large Biomes",
   "generator.wover.normal": "BetterX",
+  "generator.wover.normal_flat_nether": "BetterX (Nether without vertical biomes)",
   "generator.wover.superflat": "BetterX - Superflat",
   "title.screen.wover.worldgen.avg_biome_size": "Average Biome Size (in Chunks)",
   "title.screen.wover.worldgen.barrens_biome_size": "Barrens",

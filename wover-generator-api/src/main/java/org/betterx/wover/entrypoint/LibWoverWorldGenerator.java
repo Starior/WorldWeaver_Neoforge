@@ -46,6 +46,11 @@ public class LibWoverWorldGenerator {
                               .register(WorldPresets.WOVER_WORLD);
 
         WorldPresetInfoBuilder.start(context)
+                              .order(1550)
+                              .overworldOverride(net.minecraft.world.level.levelgen.presets.WorldPresets.NORMAL)
+                              .register(WorldPresets.WOVER_WORLD_FLAT_NETHER);
+
+        WorldPresetInfoBuilder.start(context)
                               .order(1600)
                               .overworldOverride(net.minecraft.world.level.levelgen.presets.WorldPresets.FLAT)
                               .netherOverride(WorldPresets.WOVER_WORLD)
