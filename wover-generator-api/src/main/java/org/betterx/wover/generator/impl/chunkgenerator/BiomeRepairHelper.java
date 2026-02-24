@@ -240,9 +240,22 @@ class BiomeRepairHelper {
     ) throws ReflectiveOperationException {
         int added = 0;
         final Class<?> endRegistryClass = Class.forName("terrablender.api.EndBiomeRegistry");
+        final Set<ResourceKey<Biome>> claimedBiomes = new HashSet<>();
 
+        // Wover picker population deduplicates biomes globally across tags. If a TerraBlender end biome is registered in
+        // multiple end categories (e.g. highlands + midlands + edge), we must pick one category deterministically or it
+        // may end up in a transitional bucket (edge/barrens) and appear "missing" in normal land placement.
         added += addTerraBlenderEndBiomeSet(
                 endRegistryClass,
+                claimedBiomes,
+                "getIslandBiomes",
+                biomes,
+                biomeTagWorker,
+                CommonBiomeTags.IS_SMALL_END_ISLAND
+        );
+        added += addTerraBlenderEndBiomeSet(
+                endRegistryClass,
+                claimedBiomes,
                 "getHighlandsBiomes",
                 biomes,
                 biomeTagWorker,
@@ -250,6 +263,7 @@ class BiomeRepairHelper {
         );
         added += addTerraBlenderEndBiomeSet(
                 endRegistryClass,
+                claimedBiomes,
                 "getMidlandsBiomes",
                 biomes,
                 biomeTagWorker,
@@ -257,17 +271,11 @@ class BiomeRepairHelper {
         );
         added += addTerraBlenderEndBiomeSet(
                 endRegistryClass,
+                claimedBiomes,
                 "getEdgeBiomes",
                 biomes,
                 biomeTagWorker,
                 CommonBiomeTags.IS_END_BARRENS
-        );
-        added += addTerraBlenderEndBiomeSet(
-                endRegistryClass,
-                "getIslandBiomes",
-                biomes,
-                biomeTagWorker,
-                CommonBiomeTags.IS_SMALL_END_ISLAND
         );
 
         return added;
@@ -275,6 +283,7 @@ class BiomeRepairHelper {
 
     private int addTerraBlenderEndBiomeSet(
             Class<?> endRegistryClass,
+            Set<ResourceKey<Biome>> claimedBiomes,
             String getter,
             Registry<Biome> biomes,
             BiomeTagModificationWorker biomeTagWorker,
@@ -294,6 +303,9 @@ class BiomeRepairHelper {
                 @SuppressWarnings("unchecked")
                 final ResourceKey<Biome> biomeKey = (ResourceKey<Biome>) key;
                 if (biomes.containsKey(biomeKey)) {
+                    if (!claimedBiomes.add(biomeKey)) {
+                        continue;
+                    }
                     final Holder.Reference<Biome> holder = biomes.getHolderOrThrow(biomeKey);
                     if (!holder.is(tag)) {
                         biomeTagWorker.addBiomeToTag(tag, biomes, biomeKey, holder);

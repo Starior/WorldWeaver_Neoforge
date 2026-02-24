@@ -12,6 +12,7 @@ import net.minecraft.core.LayeredRegistryAccess;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.RegistryLayer;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.world.level.biome.Biome;
@@ -25,6 +26,7 @@ import net.minecraft.world.level.storage.WorldData;
 import com.google.common.base.Stopwatch;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -64,6 +66,49 @@ public class SurfaceRuleUtil {
                        .map(SurfaceRuleUtil::getRulesForBiome)
                        .flatMap(List::stream)
                        .collect(Collectors.toCollection(LinkedList::new));
+    }
+
+    private static List<SurfaceRules.RuleSource> getCompatRulesForDimension(
+            ResourceKey<LevelStem> dimensionKey,
+            BiomeSource source
+    ) {
+        if (!LevelStem.END.equals(dimensionKey)) {
+            return List.of();
+        }
+
+        final boolean hasEnderscapeBiome = source.possibleBiomes()
+                                             .stream()
+                                             .map(Holder::unwrapKey)
+                                             .flatMap(Optional::stream)
+                                             .map(ResourceKey::location)
+                                             .map(ResourceLocation::getNamespace)
+                                             .anyMatch("enderscape"::equals);
+        if (!hasEnderscapeBiome) {
+            return List.of();
+        }
+
+        final SurfaceRules.RuleSource enderscapeRules = tryBuildEnderscapeSurfaceRules();
+        if (enderscapeRules == null) {
+            return List.of();
+        }
+
+        // Enderscape normally prepends these rules to the End noise settings. Wover rebuilds surface rules from the
+        // original base sequence, so we re-inject them here when Enderscape biomes are present.
+        return List.of(enderscapeRules);
+    }
+
+    private static SurfaceRules.RuleSource tryBuildEnderscapeSurfaceRules() {
+        try {
+            final Class<?> rulesClass = Class.forName("net.bunten.enderscape.registry.EnderscapeSurfaceRuleData");
+            final Object result = rulesClass.getMethod("makeRules").invoke(null);
+            if (result instanceof SurfaceRules.RuleSource ruleSource) {
+                return ruleSource;
+            }
+        } catch (ReflectiveOperationException e) {
+            LibWoverSurface.C.LOG.verbose("Unable to import Enderscape surface rules: {}", e.getMessage());
+        }
+
+        return null;
     }
 
     private static SurfaceRules.RuleSource mergeSurfaceRules(
@@ -124,11 +169,18 @@ public class SurfaceRuleUtil {
         Object o = noiseSettings.value();
         if (o instanceof SurfaceRuleProvider srp) {
             SurfaceRules.RuleSource originalRules = srp.wover_getOriginalSurfaceRules();
+            final List<SurfaceRules.RuleSource> additionalRules = new LinkedList<>(getRulesForBiomes(
+                    loadedBiomeSource.possibleBiomes().stream().map(Holder::unwrapKey).toList()
+            ));
+            final Collection<SurfaceRules.RuleSource> compatRules = getCompatRulesForDimension(dimensionKey, loadedBiomeSource);
+            if (!compatRules.isEmpty()) {
+                additionalRules.addAll(0, compatRules);
+            }
             srp.wover_overwriteSurfaceRules(mergeSurfaceRules(
                     dimensionKey,
                     originalRules,
                     loadedBiomeSource,
-                    getRulesForBiomes(loadedBiomeSource.possibleBiomes().stream().map(Holder::unwrapKey).toList())
+                    additionalRules
             ));
         }
     }
