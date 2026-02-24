@@ -48,6 +48,14 @@ public class WoverNetherConfig implements BiomeSourceConfig<WoverNetherBiomeSour
             true
     );
 
+    /** Same as MINECRAFT_18 but with vertical biomes disabled (flat nether layout). biomeSizeVertical is unused. */
+    public static final WoverNetherConfig MINECRAFT_18_NO_VERTICAL = new WoverNetherConfig(
+            NetherBiomeMapType.HEX,
+            MINECRAFT_18.biomeSize,
+            1, // unused when useVerticalBiomes is false
+            false
+    );
+
     public static final WoverNetherConfig DEFAULT = MINECRAFT_18;
 
     public static final Codec<WoverNetherConfig> CODEC = RecordCodecBuilder.create(instance -> instance

@@ -36,11 +36,15 @@ public class PresetRegistryImpl {
     public final static ResourceKey<WorldPreset> WOVER_WORLD_SUPERFLAT = WorldPresetManager.createKey(
             LibWoverWorldGenerator.C.id(
                     "superflat"));
+    /** Normal overworld, Nether without vertical biomes, BetterEnd. */
+    public final static ResourceKey<WorldPreset> WOVER_WORLD_FLAT_NETHER = WorldPresetManager.createKey(
+            LibWoverWorldGenerator.C.id("normal_flat_nether"));
     public final static ResourceKey<WorldPreset> BCL_WORLD_17
             = WorldPresetManager.createKey(LegacyHelper.BCLIB_CORE.id("legacy_17"));
 
     public static void bootstrapWorldPresets(WorldPresetBootstrapContext ctx) {
         ctx.register(WorldPresets.WOVER_WORLD, createNormal(ctx));
+        ctx.register(WorldPresets.WOVER_WORLD_FLAT_NETHER, createNormalFlatNether(ctx));
         ctx.register(WorldPresets.WOVER_WORLD_LARGE, createLarge(ctx));
         ctx.register(WorldPresets.WOVER_WORLD_AMPLIFIED, createAmplified(ctx));
         ctx.register(WorldPresets.WOVER_WORLD_SUPERFLAT, createSuperflat(ctx));
@@ -64,6 +68,7 @@ public class PresetRegistryImpl {
         context.add(
                 WorldPresetTags.NORMAL,
                 WorldPresets.WOVER_WORLD,
+                WorldPresets.WOVER_WORLD_FLAT_NETHER,
                 WorldPresets.WOVER_WORLD_AMPLIFIED,
                 WorldPresets.WOVER_WORLD_LARGE,
                 WorldPresets.WOVER_WORLD_SUPERFLAT
@@ -136,6 +141,15 @@ public class PresetRegistryImpl {
         return buildPreset(
                 ctx.overworldStem,
                 ctx.netherContext, WoverNetherConfig.DEFAULT,
+                ctx.endContext, WoverEndConfig.DEFAULT
+        );
+    }
+
+    /** Same as normal but Nether has no vertical biomes (BetterNether flat layout). */
+    private static WorldPreset createNormalFlatNether(WorldPresetBootstrapContext ctx) {
+        return buildPreset(
+                ctx.overworldStem,
+                ctx.netherContext, WoverNetherConfig.MINECRAFT_18_NO_VERTICAL,
                 ctx.endContext, WoverEndConfig.DEFAULT
         );
     }

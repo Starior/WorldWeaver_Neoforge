@@ -38,6 +38,7 @@ public class WorldPresetProvider extends WoverWorldPresetProvider {
     @Override
     protected void bootstrap(WorldPresetBootstrapContext ctx) {
         ctx.register(WorldPresets.WOVER_WORLD, createNormal(ctx));
+        ctx.register(WorldPresets.WOVER_WORLD_FLAT_NETHER, createNormalFlatNether(ctx));
         ctx.register(WorldPresets.WOVER_WORLD_LARGE, createLarge(ctx));
         ctx.register(WorldPresets.WOVER_WORLD_AMPLIFIED, createAmplified(ctx));
         ctx.register(WorldPresets.WOVER_WORLD_SUPERFLAT, createSuperflat(ctx));
@@ -64,6 +65,7 @@ public class WorldPresetProvider extends WoverWorldPresetProvider {
         provider.add(
                 WorldPresetTags.NORMAL,
                 WorldPresets.WOVER_WORLD,
+                WorldPresets.WOVER_WORLD_FLAT_NETHER,
                 WorldPresets.WOVER_WORLD_AMPLIFIED,
                 WorldPresets.WOVER_WORLD_LARGE,
                 WorldPresets.WOVER_WORLD_SUPERFLAT
@@ -116,6 +118,14 @@ public class WorldPresetProvider extends WoverWorldPresetProvider {
         return buildPreset(
                 ctx.overworldStem,
                 ctx.netherContext, WoverNetherConfig.DEFAULT,
+                ctx.endContext, WoverEndConfig.DEFAULT
+        );
+    }
+
+    private static WorldPreset createNormalFlatNether(WorldPresetBootstrapContext ctx) {
+        return buildPreset(
+                ctx.overworldStem,
+                ctx.netherContext, WoverNetherConfig.MINECRAFT_18_NO_VERTICAL,
                 ctx.endContext, WoverEndConfig.DEFAULT
         );
     }

@@ -14,6 +14,8 @@ public class WorldPresets {
     public final static ResourceKey<WorldPreset> WOVER_WORLD_LARGE = PresetRegistryImpl.WOVER_WORLD_LARGE;
     public final static ResourceKey<WorldPreset> WOVER_WORLD_AMPLIFIED = PresetRegistryImpl.WOVER_WORLD_AMPLIFIED;
     public final static ResourceKey<WorldPreset> WOVER_WORLD_SUPERFLAT = PresetRegistryImpl.WOVER_WORLD_SUPERFLAT;
+    /** Normal overworld + Nether without vertical biomes + BetterEnd. */
+    public final static ResourceKey<WorldPreset> WOVER_WORLD_FLAT_NETHER = PresetRegistryImpl.WOVER_WORLD_FLAT_NETHER;
 
 
     public static LevelStem makeWoverNetherStem(
