@@ -36,6 +36,7 @@ import java.util.Optional;
 import org.jetbrains.annotations.NotNull;
 
 public class WorldGeneratorConfigImpl {
+    private static final long MAX_GENERATOR_CONFIG_NBT_SIZE = 0x1000000L; // 16 MiB
     public static final String TAG_PRESET = "preset";
     private static final String LEGACY_TAG_GENERATOR = "generator";
     public static final String TAG_DIMENSIONS = "dimensions";
@@ -54,9 +55,16 @@ public class WorldGeneratorConfigImpl {
         CompoundTag root = null;
         if (nbtFile.exists()) {
             try {
-                root = NbtIo.readCompressed(nbtFile.toPath(), NbtAccounter.create(0x200000L));
-            } catch (IOException e) {
-                LibWoverEvents.C.log.error("NBT loading failed", e);
+                root = NbtIo.readCompressed(
+                        nbtFile.toPath(),
+                        NbtAccounter.create(MAX_GENERATOR_CONFIG_NBT_SIZE)
+                );
+            } catch (Exception e) {
+                LibWoverEvents.C.log.error(
+                        "NBT loading failed for " + nbtFile.getName()
+                                + " (max nbt size: " + MAX_GENERATOR_CONFIG_NBT_SIZE + " bytes)",
+                        e
+                );
             }
         }
         if (root != null && root.contains(TAG_PRESET))
